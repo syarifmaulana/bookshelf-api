@@ -72,24 +72,24 @@ const addBookHandler = (request, h) => {
 // menampilkan daftar buku
 const getAllBooksHandler = (request, h) => {
   const { name, reading, finished } = request.query;
-  let filteredBooks = books;
+  let filterBooks = books;
 
   if (name !== undefined) {
-    filteredBooks = filteredBooks.filter((book) => book
+    filterBooks = filterBooks.filter((book) => book
       .name.toLowerCase().includes(name.toLowerCase()));
   }
 
   if (reading !== undefined) {
-    filteredBooks = filteredBooks.filter((book) => book.reading === !!Number(reading));
+    filterBooks = filterBooks.filter((book) => book.reading === !!Number(reading));
   }
 
   if (finished !== undefined) {
-    filteredBooks = filteredBooks.filter((book) => book.finished === !!Number(finished));
+    filterBooks = filterBooks.filter((book) => book.finished === !!Number(finished));
   }
   const response = h.response({
     status: 'success',
     data: {
-      books: filteredBooks.map((book) => ({
+      books: filterBooks.map((book) => ({
         id: book.id,
         name: book.name,
         publisher: book.publisher,
