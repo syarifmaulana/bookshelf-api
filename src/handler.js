@@ -1,5 +1,6 @@
+/* eslint-disable max-len */
 const { nanoid } = require('nanoid');
-const books = require('./books').default;
+const books = require('./books');
 
 // menambahkan buku
 const addBookHandler = (request, h) => {
@@ -27,11 +28,12 @@ const addBookHandler = (request, h) => {
     updatedAt,
   };
 
-  if (name === undefined) {
+  if (!name) {
     const response = h.response({
       status: 'fail',
       message: 'Gagal menambahkan buku. Mohon isi nama buku',
     });
+
     response.code(400);
     return response;
   }
@@ -71,31 +73,51 @@ const addBookHandler = (request, h) => {
 
 // menampilkan daftar buku
 const getAllBooksHandler = (request, h) => {
-  const { name, reading, finished } = request.query;
-  let filterBooks = books;
+  const { name, finished } = request.query;
 
   if (name !== undefined) {
-    filterBooks = filterBooks.filter((book) => book
-      .name.toLowerCase().includes(name.toLowerCase()));
+    const response = h.response({
+      status: 'success',
+      data: {
+        books: books.filter((book) => book.name.toLowerCase().includes(name.toLowerCase())).map((book) => ({
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher,
+        })),
+      },
+    });
+
+    response.code(200);
+    return response;
   }
 
-  if (reading !== undefined) {
-    filterBooks = filterBooks.filter((book) => book.reading === !!Number(reading));
+  if (finished) {
+    const response = h.response({
+      status: 'success',
+      data: {
+        books: books.filter((book) => Number(book.finished) === Number(finished)).map((book) => ({
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher,
+        })),
+      },
+    });
+
+    response.code(200);
+    return response;
   }
 
-  if (finished !== undefined) {
-    filterBooks = filterBooks.filter((book) => book.finished === !!Number(finished));
-  }
   const response = h.response({
     status: 'success',
     data: {
-      books: filterBooks.map((book) => ({
+      books: books.map((book) => ({
         id: book.id,
         name: book.name,
         publisher: book.publisher,
       })),
     },
   });
+
   response.code(200);
   return response;
 };
@@ -163,12 +185,10 @@ const editBookByIdHandler = (request, h) => {
       return response;
     }
 
-    const response = h.response({
+    return {
       status: 'success',
       message: 'Buku berhasil diperbarui',
-    });
-    response.code(200);
-    return response;
+    };
   }
 
   const response = h.response({
